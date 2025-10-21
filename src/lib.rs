@@ -1,4 +1,6 @@
 use std::process;
+use std::path::{PathBuf, Path};
+use std::env;
 
 mod builtins {
     use std::env;
@@ -24,6 +26,43 @@ mod builtins {
         } else {
             eprintln!("cd: one argument needed, found: {}", args.len());
         }
+    }
+}
+
+pub fn get_cwd() -> PathBuf
+{
+    if let Ok(cwd) = env::current_dir() {
+        return cwd;
+   } else {
+        eprintln!("plush: Invalid Working Directory");
+        process::exit(1);
+    }
+}
+
+pub fn get_home() -> PathBuf
+{
+    if let Some(home) = env::var_os("HOME") {
+        return home.into();
+    } else {
+        eprintln!("plush: Expected an environment variable: $HOME");
+        eprintln!("$HOME -> [current user's home directory]");
+        process::exit(1);
+    }
+}
+
+pub fn into_shell_path(path: &Path) -> String
+{
+    let home = get_home();
+
+    if let Ok(relative_path) = path.strip_prefix(&home) {
+        return Path::new("~")
+            .join(relative_path)
+            .to_string_lossy()
+            .to_string();
+    } else {
+        return path
+            .to_string_lossy()
+            .to_string();
     }
 }
 

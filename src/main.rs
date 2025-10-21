@@ -1,22 +1,10 @@
 use std::io::{self, Write};
-use std::path::{PathBuf, Path};
-use std::env;
-use plush;
+use plush::{self, get_cwd};
 
 fn main() {
     loop {
-        let mut prompt = env::current_dir().expect("Invalid CWD (Current Working Directory)");
-        if let Ok(relative_path) = prompt
-            .strip_prefix(
-                env::var_os("HOME")
-                 .expect("Expected an environment variable: $HOME; $HOME should point to user's home directory")
-            )
-        {
-                prompt = PathBuf::from("~").join(relative_path);
-        }
+        let mut prompt = plush::into_shell_path(&get_cwd());
 
-
-        let mut prompt = prompt.to_string_lossy().to_string();
         prompt.push_str("$:- ");
 
         let mut line = String::new();
