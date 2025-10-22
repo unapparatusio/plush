@@ -12,16 +12,15 @@ fn main() {
         print!("{}", prompt);
         io::stdout().flush().unwrap();
         io::stdin().read_line(&mut line).unwrap();
-        let line = line.trim();
 
-        if line.is_empty() {
+        if !line.ends_with('\n') {
             println!();
             continue;
         }
         
-        let args = line.split(" ").collect();
+        let args = plush::Args::from(&line);
 
-        plush::execute(&args);
+        plush::execute(args);
         
     }
 }
