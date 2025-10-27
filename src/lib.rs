@@ -144,3 +144,35 @@ fn launch(program: &str, args: Args) {
         .status()
         .map_err(|e| eprintln!("plush: error while executing program: {e}"));
 }
+
+#[cfg(test)]
+mod tests
+{
+    use super::*;
+    use std::env;
+
+    #[test]
+    fn test_into_shell_path()
+    {
+        let home_dir = env::var_os("HOME").unwrap();
+        let home_dir = PathBuf::from(home_dir);
+
+        let path1 = home_dir.join("Documents");
+        let path2 = home_dir.join("Games");
+        let path3 = PathBuf::from("/usr/bin");
+
+        let path1 = into_shell_path(&path1);
+        let path2 = into_shell_path(&path2);
+        let path3 = into_shell_path(&path3);
+
+        assert_eq!(path1,
+                   String::from("~/Documents")
+                   );
+        assert_eq!(path2,
+                   String::from("~/Games")
+                   );
+        assert_eq!(path3,
+                   String::from("/usr/bin")
+                   );
+    }
+}
