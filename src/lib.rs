@@ -36,10 +36,9 @@ impl ArgsBuf {
 
 impl<T> From<&'_ T> for ArgsBuf
 where
-    T: AsRef<str>, 
+    T: AsRef<str>,
 {
-    fn from(s: &'_ T) -> ArgsBuf
-    {
+    fn from(s: &'_ T) -> ArgsBuf {
         ArgsBuf::from(&Args::from(s))
     }
 }

@@ -1,5 +1,5 @@
-use std::io::{self, Write};
 use plush::{self, get_cwd};
+use std::io::{self, Write};
 
 fn main() {
     loop {
@@ -17,10 +17,9 @@ fn main() {
             println!();
             continue;
         }
-        
+
         let args = plush::Args::from(&line);
 
         plush::execute(args);
-        
     }
 }
