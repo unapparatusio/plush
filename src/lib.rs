@@ -1,8 +1,56 @@
 mod builtins;
 
-use std::process;
-use std::path::{PathBuf, Path};
 use std::env;
+use std::path::{Path, PathBuf};
+use std::process;
+
+pub struct ArgsBuf {
+    inner: Vec<String>,
+}
+
+impl ArgsBuf {
+    pub fn new() -> Self {
+        ArgsBuf { inner: Vec::new() }
+    }
+
+    pub fn push(&mut self, element: String) {
+        let cleaned = element.trim().to_string();
+
+        if !cleaned.is_empty() {
+            self.inner.push(cleaned);
+        }
+    }
+
+    pub fn remove(&mut self, index: usize) -> String {
+        self.inner.remove(index)
+    }
+
+    pub fn len(&self) -> usize {
+        self.inner.len()
+    }
+
+    pub fn as_slice(&self) -> &[String] {
+        self.inner.as_slice()
+    }
+}
+
+impl<T> From<&'_ T> for ArgsBuf
+where
+    T: AsRef<str>, 
+{
+    fn from(s: &'_ T) -> ArgsBuf
+    {
+        ArgsBuf::from(&Args::from(s))
+    }
+}
+
+impl From<&Args<'_>> for ArgsBuf {
+    fn from(args: &Args) -> Self {
+        let inner = args.inner.iter().map(|x| x.to_string()).collect();
+
+        ArgsBuf { inner }
+    }
+}
 
 pub struct Args<'a> {
     inner: Vec<&'a str>,
@@ -10,13 +58,10 @@ pub struct Args<'a> {
 
 impl<'a> Args<'a> {
     pub fn new() -> Self {
-        Args
-        {
-            inner: Vec::new(),
-        }
+        Args { inner: Vec::new() }
     }
 
-    pub fn add(&mut self, element: &'a str) {
+    pub fn push(&mut self, element: &'a str) {
         let cleaned = element.trim();
 
         if !cleaned.is_empty() {
@@ -24,49 +69,48 @@ impl<'a> Args<'a> {
         }
     }
 
-    pub fn remove(&mut self, index: usize) -> &'a str
-    {
+    pub fn remove(&mut self, index: usize) -> &'a str {
         self.inner.remove(index)
     }
 
-    pub fn len(&self) -> usize
-    {
+    pub fn len(&self) -> usize {
         self.inner.len()
     }
 
-    pub fn as_slice(&self) -> &[&str]
-    {
+    pub fn as_slice(&self) -> &[&str] {
         self.inner.as_slice()
     }
 }
 
 impl<'a, T> From<&'a T> for Args<'a>
-    where T: AsRef<str> {
-
+where
+    T: AsRef<str>,
+{
     fn from(s: &'a T) -> Self {
-        let inner = s.as_ref()
-            .split_ascii_whitespace()
-            .collect();
+        let inner = s.as_ref().split_ascii_whitespace().collect();
 
-        Args
-        {
-            inner
-        }
+        Args { inner }
     }
 }
 
-pub fn get_cwd() -> PathBuf
-{
+impl<'a> From<&'a ArgsBuf> for Args<'a> {
+    fn from(args: &'a ArgsBuf) -> Self {
+        let inner = args.inner.iter().map(|x| x.as_ref()).collect();
+
+        Args { inner }
+    }
+}
+
+pub fn get_cwd() -> PathBuf {
     if let Ok(cwd) = env::current_dir() {
         return cwd;
-   } else {
+    } else {
         eprintln!("plush: Invalid Working Directory");
         process::exit(1);
     }
 }
 
-pub fn get_home() -> PathBuf
-{
+pub fn get_home() -> PathBuf {
     if let Some(home) = env::var_os("HOME") {
         return home.into();
     } else {
@@ -76,8 +120,7 @@ pub fn get_home() -> PathBuf
     }
 }
 
-pub fn into_shell_path(path: &Path) -> String
-{
+pub fn into_shell_path(path: &Path) -> String {
     let home = get_home();
 
     if let Ok(relative_path) = path.strip_prefix(&home) {
@@ -86,9 +129,7 @@ pub fn into_shell_path(path: &Path) -> String
             .to_string_lossy()
             .to_string();
     } else {
-        return path
-            .to_string_lossy()
-            .to_string();
+        return path.to_string_lossy().to_string();
     }
 }
 
@@ -96,7 +137,7 @@ pub fn execute(mut args: Args) {
     use crate::builtins::*;
 
     if args.len() == 0 {
-            return;
+        return;
     }
 
     let root = args.remove(0);
@@ -109,7 +150,6 @@ pub fn execute(mut args: Args) {
     }
 
     launch(root, args);
-
 }
 
 fn launch(program: &str, args: Args) {
@@ -120,14 +160,12 @@ fn launch(program: &str, args: Args) {
 }
 
 #[cfg(test)]
-mod tests
-{
+mod tests {
     use super::*;
     use std::env;
 
     #[test]
-    fn test_into_shell_path()
-    {
+    fn test_into_shell_path() {
         let home_dir = env::var_os("HOME").unwrap();
         let home_dir = PathBuf::from(home_dir);
 
@@ -139,14 +177,8 @@ mod tests
         let path2 = into_shell_path(&path2);
         let path3 = into_shell_path(&path3);
 
-        assert_eq!(path1,
-                   String::from("~/Documents")
-                   );
-        assert_eq!(path2,
-                   String::from("~/Games")
-                   );
-        assert_eq!(path3,
-                   String::from("/usr/bin")
-                   );
+        assert_eq!(path1, String::from("~/Documents"));
+        assert_eq!(path2, String::from("~/Games"));
+        assert_eq!(path3, String::from("/usr/bin"));
     }
 }
