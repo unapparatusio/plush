@@ -4,13 +4,13 @@ use std::env;
 use std::path::{Path, PathBuf};
 use std::process;
 
-pub struct ArgsBuf {
+pub struct OwnedArgs {
     inner: Vec<String>,
 }
 
-impl ArgsBuf {
+impl OwnedArgs {
     pub fn new() -> Self {
-        ArgsBuf { inner: Vec::new() }
+        OwnedArgs { inner: Vec::new() }
     }
 
     pub fn push(&mut self, element: String) {
@@ -34,20 +34,20 @@ impl ArgsBuf {
     }
 }
 
-impl<T> From<&'_ T> for ArgsBuf
+impl<T> From<&'_ T> for OwnedArgs
 where
     T: AsRef<str>,
 {
-    fn from(s: &'_ T) -> ArgsBuf {
-        ArgsBuf::from(&Args::from(s))
+    fn from(s: &'_ T) -> Self {
+        OwnedArgs::from(&Args::from(s))
     }
 }
 
-impl From<&Args<'_>> for ArgsBuf {
+impl From<&Args<'_>> for OwnedArgs {
     fn from(args: &Args) -> Self {
         let inner = args.inner.iter().map(|x| x.to_string()).collect();
 
-        ArgsBuf { inner }
+        OwnedArgs { inner }
     }
 }
 
@@ -92,8 +92,8 @@ where
     }
 }
 
-impl<'a> From<&'a ArgsBuf> for Args<'a> {
-    fn from(args: &'a ArgsBuf) -> Self {
+impl<'a> From<&'a OwnedArgs> for Args<'a> {
+    fn from(args: &'a OwnedArgs) -> Self {
         let inner = args.inner.iter().map(|x| x.as_ref()).collect();
 
         Args { inner }
