@@ -21,8 +21,12 @@ impl OwnedArgs {
         }
     }
 
-    pub fn remove(&mut self, index: usize) -> String {
-        self.inner.remove(index)
+    pub fn remove(&mut self, index: usize) -> Option<String> {
+        if index < self.len() {   
+            Some(self.inner.remove(index))
+        } else {
+            None
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -68,8 +72,12 @@ impl<'a> Args<'a> {
         }
     }
 
-    pub fn remove(&mut self, index: usize) -> &'a str {
-        self.inner.remove(index)
+    pub fn remove(&mut self, index: usize) -> Option<&'a str> {
+        if index < self.len() {   
+            Some(self.inner.remove(index))
+        } else {
+            None
+        }
     }
 
     pub fn len(&self) -> usize {
@@ -139,7 +147,7 @@ pub fn execute(mut args: Args) {
         return;
     }
 
-    let root = args.remove(0);
+    let root = args.remove(0).unwrap();
 
     for &(cmd, ref handler) in OVERWRITES.iter() {
         if root == cmd {
