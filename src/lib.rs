@@ -3,6 +3,10 @@ mod builtins;
 use std::env;
 use std::path::{Path, PathBuf};
 use std::process;
+use std::iter::*;
+use std::slice::Iter;
+
+type ArgsIter<'a> = Map<Iter<'a, &'a str>, fn(&&'a str) -> &'a str>;
 
 pub struct OwnedArgs {
     inner: Vec<String>,
@@ -86,6 +90,11 @@ impl<'a> Args<'a> {
 
     pub fn as_slice(&self) -> &[&str] {
         self.inner.as_slice()
+    }
+
+    pub fn iter(&'a self) -> ArgsIter<'a>
+    {
+        self.inner.iter().map(|x| *x)
     }
 }
 
