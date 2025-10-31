@@ -16,7 +16,13 @@ fn main() {
         if !line.ends_with('\n') {
             println!();
             continue;
+        } 
+
+        if line.ends_with("\r\n") {
+            line.pop();
+            line.pop();
         }
+
 
         let args = plush::Args::from(&line);
 
