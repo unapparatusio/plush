@@ -141,9 +141,9 @@ pub fn execute(mut args: Args) {
 
     let root = args.remove(0);
 
-    for &(cmd, subr) in BUILTINS.iter() {
+    for &(cmd, ref handler) in OVERWRITES.iter() {
         if root == cmd {
-            subr(args);
+            handler.handle(args);
             return;
         }
     }
