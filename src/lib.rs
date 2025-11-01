@@ -157,15 +157,22 @@ pub fn execute(mut args: Args) {
     }
 
     let root = args.remove(0).unwrap();
+     
+    let mut found = false;    
 
-    for &(cmd, ref handler) in OVERWRITES.iter() {
-        if root == cmd {
-            handler.handle(args);
-            return;
+    OVERWRITES.with_borrow(|v| {
+        for (cmd, handler) in v.iter() {
+            if root == cmd {
+                handler.handle(&args);
+                found = true;
+                return;
+            }
         }
-    }
+    });
 
-    launch(root, args);
+    if !found {
+        launch(root, args);
+    }
 }
 
 fn launch(program: &str, args: Args) {
