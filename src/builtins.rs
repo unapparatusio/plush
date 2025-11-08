@@ -67,7 +67,11 @@ impl CommandHandler {
         match self {
             CommandHandler::Builtin (subr) => subr(args),
             CommandHandler::Alias (replacement) => {
-                todo!()
+                use crate::execute;
+
+                execute(Args::from(replacement));
+
+                //TODO: We need to implement add on Args, and add replacement with args
             }
         }
     }
