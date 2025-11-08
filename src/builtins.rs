@@ -11,6 +11,20 @@ pub static OVERWRITES: RefCell<Vec<(String, CommandHandler)>> =
     ]);
 }
 
+pub(crate) fn find_and_handle(root: &str, args: &Args) -> bool {
+        
+    OVERWRITES.with_borrow(|v| {
+        for (cmd, handler) in v.iter() {
+            if root == cmd {
+                handler.handle(args);
+                return true;
+            }
+        }
+
+        return false;
+    })
+}
+
 fn exit(args: &Args) {
     if args.len() == 0 {
         process::exit(0);
@@ -27,13 +41,13 @@ fn cd(args: &Args) {
     }
 }
 
-pub(crate) enum CommandHandler {
+enum CommandHandler {
     Builtin (fn(&Args)),
     Alias (OwnedArgs),
 }
 
 impl CommandHandler {
-    pub(crate) fn handle(&self, args: &Args)
+    fn handle(&self, args: &Args)
     {
         match self {
             CommandHandler::Builtin (subr) => subr(args),

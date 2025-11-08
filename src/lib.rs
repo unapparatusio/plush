@@ -158,19 +158,9 @@ pub fn execute(mut args: Args) {
 
     let root = args.remove(0).unwrap();
      
-    let mut found = false;    
+    let found = find_and_handle(root, &args);    
 
-    OVERWRITES.with_borrow(|v| {
-        for (cmd, handler) in v.iter() {
-            if root == cmd {
-                handler.handle(&args);
-                found = true;
-                return;
-            }
-        }
-    });
-
-    if !found {
+        if !found {
         launch(root, args);
     }
 }
