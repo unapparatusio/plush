@@ -8,6 +8,7 @@ use std::slice::Iter;
 
 type ArgsIter<'a> = Map<Iter<'a, &'a str>, fn(&&'a str) -> &'a str>;
 
+#[derive(Clone, Debug)]
 pub struct OwnedArgs {
     inner: Vec<String>,
 }
